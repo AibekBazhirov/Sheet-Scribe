@@ -1,4 +1,3 @@
-
 import { type Transaction, type InsertTransaction } from "@shared/schema";
 import { GoogleSpreadsheet } from "google-spreadsheet";
 import { JWT } from "google-auth-library";
@@ -44,10 +43,10 @@ export class GoogleSheetsStorage implements IStorage {
   private async getSheet() {
     const doc = await this.getDoc();
     const sheet = doc.sheetsByIndex[0];
-    // Ensure header row
     await sheet.loadHeaderRow();
+    const headers = ['id', 'month', 'date', 'debit_id', 'credit_id', 'quantity', 'amount', 'curr', 'worker_id', 'counterparty_id', 'division_id', 'store_id', 'sales_type', 'brand', 'model', 'serial_number', 'db_account_id', 'cr_account_id', 'description', 'created_at', 'accrued_for', 'created_by', 'updated_at', 'party_number', 'status', 'rec_price', 'discount'];
     if (sheet.headerValues.length === 0) {
-        await sheet.setHeaderRow(['id', 'date', 'amount', 'description', 'category']);
+      await sheet.setHeaderRow(headers);
     }
     return sheet;
   }
@@ -58,15 +57,35 @@ export class GoogleSheetsStorage implements IStorage {
       const rows = await sheet.getRows();
       return rows.map((row, index) => ({
         id: parseInt(row.get('id')) || index + 1,
+        month: row.get('month') || null,
         date: row.get('date'),
+        debit_id: row.get('debit_id') || null,
+        credit_id: row.get('credit_id') || null,
+        quantity: row.get('quantity') || null,
         amount: row.get('amount'),
-        description: row.get('description'),
-        category: row.get('category'),
-      }));
+        curr: row.get('curr') || null,
+        worker_id: row.get('worker_id') || null,
+        counterparty_id: row.get('counterparty_id') || null,
+        division_id: row.get('division_id') || null,
+        store_id: row.get('store_id') || null,
+        sales_type: row.get('sales_type') || null,
+        brand: row.get('brand') || null,
+        model: row.get('model') || null,
+        serial_number: row.get('serial_number') || null,
+        db_account_id: row.get('db_account_id') || null,
+        cr_account_id: row.get('cr_account_id') || null,
+        description: row.get('description') || null,
+        created_at: row.get('created_at') ? new Date(row.get('created_at')) : new Date(),
+        accrued_for: row.get('accrued_for') || null,
+        created_by: row.get('created_by') || null,
+        updated_at: row.get('updated_at') ? new Date(row.get('updated_at')) : new Date(),
+        party_number: row.get('party_number') || null,
+        status: row.get('status') || null,
+        rec_price: row.get('rec_price') || null,
+        discount: row.get('discount') || null,
+      })) as Transaction[];
     } catch (error) {
       console.error("Error fetching transactions from Google Sheets:", error);
-      // Fallback or rethrow depending on desired behavior. 
-      // For now returning empty array if config is missing to avoid crashing app loop if user hasn't set env vars yet
       if (error instanceof Error && error.message.includes("Missing Google Sheets credentials")) {
         return []; 
       }
@@ -77,21 +96,46 @@ export class GoogleSheetsStorage implements IStorage {
   async createTransaction(transaction: InsertTransaction): Promise<Transaction> {
     try {
       const sheet = await this.getSheet();
-      const newId = (await sheet.getRows()).length + 1;
+      const rows = await sheet.getRows();
+      const newId = rows.length + 1;
       
       const rowData = {
         id: newId,
+        month: transaction.month || '',
         date: transaction.date,
+        debit_id: transaction.debit_id || '',
+        credit_id: transaction.credit_id || '',
+        quantity: transaction.quantity || '',
         amount: transaction.amount,
-        description: transaction.description,
-        category: transaction.category
+        curr: transaction.curr || '',
+        worker_id: transaction.worker_id || '',
+        counterparty_id: transaction.counterparty_id || '',
+        division_id: transaction.division_id || '',
+        store_id: transaction.store_id || '',
+        sales_type: transaction.sales_type || '',
+        brand: transaction.brand || '',
+        model: transaction.model || '',
+        serial_number: transaction.serial_number || '',
+        db_account_id: transaction.db_account_id || '',
+        cr_account_id: transaction.cr_account_id || '',
+        description: transaction.description || '',
+        created_at: new Date().toISOString(),
+        accrued_for: transaction.accrued_for || '',
+        created_by: transaction.created_by || '',
+        updated_at: new Date().toISOString(),
+        party_number: transaction.party_number || '',
+        status: transaction.status || '',
+        rec_price: transaction.rec_price || '',
+        discount: transaction.discount || '',
       };
 
       await sheet.addRow(rowData);
 
       return {
-        ...rowData,
-        id: newId
+        ...transaction,
+        id: newId,
+        created_at: new Date(),
+        updated_at: new Date(),
       };
     } catch (error) {
       console.error("Error creating transaction in Google Sheets:", error);
@@ -110,7 +154,13 @@ export class MemStorage implements IStorage {
     }
   
     async createTransaction(insertTransaction: InsertTransaction): Promise<Transaction> {
-      const transaction: Transaction = { ...insertTransaction, id: this.idCounter++ };
+      const now = new Date();
+      const transaction: Transaction = {
+        ...insertTransaction,
+        id: this.idCounter++,
+        created_at: now,
+        updated_at: now,
+      };
       this.transactions.push(transaction);
       return transaction;
     }
