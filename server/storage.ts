@@ -94,8 +94,12 @@ export class GoogleSheetsStorage implements IStorage {
       await sheet.addRow(rowData);
 
       return {
-        ...transaction,
         id: newId,
+        date: transaction.date,
+        amount: transaction.amount,
+        debit_id: transaction.debit_id || null,
+        credit_id: transaction.credit_id || null,
+        brand: transaction.brand || null,
         created_at: new Date(),
         updated_at: new Date(),
       };
@@ -117,8 +121,12 @@ export class MemStorage implements IStorage {
     async createTransaction(insertTransaction: InsertTransaction): Promise<Transaction> {
       const now = new Date();
       const transaction: Transaction = {
-        ...insertTransaction,
         id: this.idCounter++,
+        date: insertTransaction.date,
+        amount: insertTransaction.amount,
+        debit_id: insertTransaction.debit_id || null,
+        credit_id: insertTransaction.credit_id || null,
+        brand: insertTransaction.brand || null,
         created_at: now,
         updated_at: now,
       };

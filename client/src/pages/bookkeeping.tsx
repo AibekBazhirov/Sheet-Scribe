@@ -104,7 +104,7 @@ export default function Bookkeeping() {
                     <FormItem>
                       <FormLabel>Debit ID</FormLabel>
                       <FormControl>
-                        <Input placeholder="Debit account" {...field} data-testid="input-debit" />
+                        <Input placeholder="Debit account" {...field} value={field.value || ""} data-testid="input-debit" />
                       </FormControl>
                     </FormItem>
                   )}
@@ -116,7 +116,7 @@ export default function Bookkeeping() {
                     <FormItem>
                       <FormLabel>Credit ID</FormLabel>
                       <FormControl>
-                        <Input placeholder="Credit account" {...field} data-testid="input-credit" />
+                        <Input placeholder="Credit account" {...field} value={field.value || ""} data-testid="input-credit" />
                       </FormControl>
                     </FormItem>
                   )}
@@ -130,7 +130,7 @@ export default function Bookkeeping() {
                   <FormItem>
                     <FormLabel>Brand</FormLabel>
                     <FormControl>
-                      <Input placeholder="Brand name" {...field} data-testid="input-brand" />
+                      <Input placeholder="Brand name" {...field} value={field.value || ""} data-testid="input-brand" />
                     </FormControl>
                   </FormItem>
                 )}
