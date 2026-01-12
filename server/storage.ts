@@ -44,7 +44,7 @@ export class GoogleSheetsStorage implements IStorage {
     const doc = await this.getDoc();
     const sheet = doc.sheetsByIndex[0];
     await sheet.loadHeaderRow();
-    const headers = ['id', 'month', 'date', 'debit_id', 'credit_id', 'quantity', 'amount', 'curr', 'worker_id', 'counterparty_id', 'division_id', 'store_id', 'sales_type', 'brand', 'model', 'serial_number', 'db_account_id', 'cr_account_id', 'description', 'created_at', 'accrued_for', 'created_by', 'updated_at', 'party_number', 'status', 'rec_price', 'discount'];
+    const headers = ['id', 'date', 'amount', 'debit_id', 'credit_id', 'brand', 'created_at', 'updated_at'];
     if (sheet.headerValues.length === 0) {
       await sheet.setHeaderRow(headers);
     }
@@ -57,32 +57,13 @@ export class GoogleSheetsStorage implements IStorage {
       const rows = await sheet.getRows();
       return rows.map((row, index) => ({
         id: parseInt(row.get('id')) || index + 1,
-        month: row.get('month') || null,
         date: row.get('date'),
+        amount: row.get('amount'),
         debit_id: row.get('debit_id') || null,
         credit_id: row.get('credit_id') || null,
-        quantity: row.get('quantity') || null,
-        amount: row.get('amount'),
-        curr: row.get('curr') || null,
-        worker_id: row.get('worker_id') || null,
-        counterparty_id: row.get('counterparty_id') || null,
-        division_id: row.get('division_id') || null,
-        store_id: row.get('store_id') || null,
-        sales_type: row.get('sales_type') || null,
         brand: row.get('brand') || null,
-        model: row.get('model') || null,
-        serial_number: row.get('serial_number') || null,
-        db_account_id: row.get('db_account_id') || null,
-        cr_account_id: row.get('cr_account_id') || null,
-        description: row.get('description') || null,
         created_at: row.get('created_at') ? new Date(row.get('created_at')) : new Date(),
-        accrued_for: row.get('accrued_for') || null,
-        created_by: row.get('created_by') || null,
         updated_at: row.get('updated_at') ? new Date(row.get('updated_at')) : new Date(),
-        party_number: row.get('party_number') || null,
-        status: row.get('status') || null,
-        rec_price: row.get('rec_price') || null,
-        discount: row.get('discount') || null,
       })) as Transaction[];
     } catch (error) {
       console.error("Error fetching transactions from Google Sheets:", error);
@@ -101,32 +82,13 @@ export class GoogleSheetsStorage implements IStorage {
       
       const rowData = {
         id: newId,
-        month: transaction.month || '',
         date: transaction.date,
+        amount: transaction.amount,
         debit_id: transaction.debit_id || '',
         credit_id: transaction.credit_id || '',
-        quantity: transaction.quantity || '',
-        amount: transaction.amount,
-        curr: transaction.curr || '',
-        worker_id: transaction.worker_id || '',
-        counterparty_id: transaction.counterparty_id || '',
-        division_id: transaction.division_id || '',
-        store_id: transaction.store_id || '',
-        sales_type: transaction.sales_type || '',
         brand: transaction.brand || '',
-        model: transaction.model || '',
-        serial_number: transaction.serial_number || '',
-        db_account_id: transaction.db_account_id || '',
-        cr_account_id: transaction.cr_account_id || '',
-        description: transaction.description || '',
         created_at: new Date().toISOString(),
-        accrued_for: transaction.accrued_for || '',
-        created_by: transaction.created_by || '',
         updated_at: new Date().toISOString(),
-        party_number: transaction.party_number || '',
-        status: transaction.status || '',
-        rec_price: transaction.rec_price || '',
-        discount: transaction.discount || '',
       };
 
       await sheet.addRow(rowData);
@@ -144,7 +106,6 @@ export class GoogleSheetsStorage implements IStorage {
   }
 }
 
-// Fallback to in-memory storage if credentials aren't set, to allow app to start
 export class MemStorage implements IStorage {
     private transactions: Transaction[] = [];
     private idCounter = 1;
@@ -166,7 +127,6 @@ export class MemStorage implements IStorage {
     }
 }
 
-// Export a factory that chooses the right storage
 function createStorage(): IStorage {
     if (process.env.GOOGLE_SHEET_ID && process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL && process.env.GOOGLE_PRIVATE_KEY) {
         console.log("Using Google Sheets Storage");
