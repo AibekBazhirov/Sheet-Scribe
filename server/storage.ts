@@ -55,10 +55,17 @@ export class GoogleSheetsStorage implements IStorage {
   private async getSheet() {
     const doc = await this.getDoc();
     const sheet = doc.sheetsByIndex[0];
-    await sheet.loadHeaderRow();
     const headers = ['id', 'date', 'amount', 'debit_id', 'credit_id', 'brand', 'created_at', 'updated_at'];
-    if (sheet.headerValues.length === 0) {
+    
+    try {
+      await sheet.loadHeaderRow();
+      if (!sheet.headerValues || sheet.headerValues.length === 0) {
+        await sheet.setHeaderRow(headers);
+      }
+    } catch (error) {
+      // If loading header fails (empty sheet), set the headers
       await sheet.setHeaderRow(headers);
+      await sheet.loadHeaderRow();
     }
     return sheet;
   }
