@@ -27,10 +27,12 @@ export default function Bookkeeping() {
     },
   });
 
+  const today = new Date().toISOString().split('T')[0];
+  
   const form = useForm<InsertTransaction>({
     resolver: zodResolver(insertTransactionSchema),
     defaultValues: {
-      date: "",
+      date: today,
       amount: "",
       debit_id: "",
       credit_id: "",
