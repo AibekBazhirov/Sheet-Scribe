@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { Button } from "@/components/ui/button";
@@ -6,14 +7,24 @@ import { Card } from "@/components/ui/card";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Form, FormControl, FormField, FormItem, FormLabel } from "@/components/ui/form";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { api } from "@shared/routes";
 import { insertTransactionSchema, type InsertTransaction, type Transaction } from "@shared/schema";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2 } from "lucide-react";
 
+const transactionTypes = [
+  "Продажи",
+  "Приход",
+  "Расход",
+  "Кассовые операции",
+  "Погашение долга",
+];
+
 export default function Bookkeeping() {
   const { toast } = useToast();
+  const [selectedType, setSelectedType] = useState(transactionTypes[0]);
 
   const { data: transactions = [], isLoading } = useQuery<Transaction[]>({
     queryKey: [api.transactions.list.path],
@@ -69,7 +80,20 @@ export default function Bookkeeping() {
   return (
     <div className="min-h-screen bg-background p-6">
       <div className="max-w-4xl mx-auto">
-        <h1 className="text-3xl font-bold mb-8" data-testid="heading-title">Продажи</h1>
+        <div className="mb-8">
+          <Select value={selectedType} onValueChange={setSelectedType}>
+            <SelectTrigger className="w-auto text-3xl font-bold border-none shadow-none p-0 h-auto" data-testid="select-type">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {transactionTypes.map((type) => (
+                <SelectItem key={type} value={type} data-testid={`select-item-${type}`}>
+                  {type}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
 
         <Card className="p-6 mb-8">
           <h2 className="text-xl font-semibold mb-6" data-testid="heading-form">Добавить транзакцию</h2>
