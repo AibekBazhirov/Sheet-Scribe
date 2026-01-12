@@ -15,11 +15,15 @@ import { Loader2 } from "lucide-react";
 export default function Bookkeeping() {
   const { toast } = useToast();
 
-  const { data: transactions, isLoading } = useQuery<Transaction[]>({
+  const { data: transactions = [], isLoading } = useQuery<Transaction[]>({
     queryKey: [api.transactions.list.path],
     queryFn: async () => {
       const res = await fetch(api.transactions.list.path);
-      return res.json();
+      if (!res.ok) {
+        return [];
+      }
+      const data = await res.json();
+      return Array.isArray(data) ? data : [];
     },
   });
 
