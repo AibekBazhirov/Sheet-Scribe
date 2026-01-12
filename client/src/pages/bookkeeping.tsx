@@ -67,7 +67,7 @@ export default function Bookkeeping() {
   return (
     <div className="min-h-screen bg-background p-6">
       <div className="max-w-4xl mx-auto">
-        <h1 className="text-3xl font-bold mb-8" data-testid="heading-title">Bookkeeping</h1>
+        <h1 className="text-3xl font-bold mb-8" data-testid="heading-title">Продажи</h1>
 
         <Card className="p-6 mb-8">
           <h2 className="text-xl font-semibold mb-6" data-testid="heading-form">Add Transaction</h2>
