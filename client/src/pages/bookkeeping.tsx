@@ -45,16 +45,16 @@ export default function Bookkeeping() {
     },
     onSuccess: () => {
       toast({
-        title: "Success",
-        description: "Transaction added successfully",
+        title: "Успешно",
+        description: "Транзакция добавлена",
       });
       queryClient.invalidateQueries({ queryKey: [api.transactions.list.path] });
       form.reset();
     },
     onError: (error: Error) => {
       toast({
-        title: "Error",
-        description: error.message || "Failed to add transaction",
+        title: "Ошибка",
+        description: error.message || "Не удалось добавить транзакцию",
         variant: "destructive",
       });
     },
@@ -70,7 +70,7 @@ export default function Bookkeeping() {
         <h1 className="text-3xl font-bold mb-8" data-testid="heading-title">Продажи</h1>
 
         <Card className="p-6 mb-8">
-          <h2 className="text-xl font-semibold mb-6" data-testid="heading-form">Add Transaction</h2>
+          <h2 className="text-xl font-semibold mb-6" data-testid="heading-form">Добавить транзакцию</h2>
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -79,7 +79,7 @@ export default function Bookkeeping() {
                   name="date"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Date *</FormLabel>
+                      <FormLabel>Дата *</FormLabel>
                       <FormControl>
                         <Input type="date" {...field} data-testid="input-date" />
                       </FormControl>
@@ -91,7 +91,7 @@ export default function Bookkeeping() {
                   name="amount"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Amount *</FormLabel>
+                      <FormLabel>Сумма *</FormLabel>
                       <FormControl>
                         <Input type="number" step="0.01" placeholder="0.00" {...field} data-testid="input-amount" />
                       </FormControl>
@@ -106,9 +106,9 @@ export default function Bookkeeping() {
                   name="debit_id"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Debit ID</FormLabel>
+                      <FormLabel>ID дебета</FormLabel>
                       <FormControl>
-                        <Input placeholder="Debit account" {...field} value={field.value || ""} data-testid="input-debit" />
+                        <Input placeholder="Дебетовый счёт" {...field} value={field.value || ""} data-testid="input-debit" />
                       </FormControl>
                     </FormItem>
                   )}
@@ -118,9 +118,9 @@ export default function Bookkeeping() {
                   name="credit_id"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Credit ID</FormLabel>
+                      <FormLabel>ID кредита</FormLabel>
                       <FormControl>
-                        <Input placeholder="Credit account" {...field} value={field.value || ""} data-testid="input-credit" />
+                        <Input placeholder="Кредитовый счёт" {...field} value={field.value || ""} data-testid="input-credit" />
                       </FormControl>
                     </FormItem>
                   )}
@@ -132,9 +132,9 @@ export default function Bookkeeping() {
                 name="brand"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Brand</FormLabel>
+                    <FormLabel>Бренд</FormLabel>
                     <FormControl>
-                      <Input placeholder="Brand name" {...field} value={field.value || ""} data-testid="input-brand" />
+                      <Input placeholder="Название бренда" {...field} value={field.value || ""} data-testid="input-brand" />
                     </FormControl>
                   </FormItem>
                 )}
@@ -147,14 +147,14 @@ export default function Bookkeeping() {
                 data-testid="button-submit"
               >
                 {createMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                {createMutation.isPending ? "Adding..." : "Add Transaction"}
+                {createMutation.isPending ? "Добавление..." : "Добавить транзакцию"}
               </Button>
             </form>
           </Form>
         </Card>
 
         <Card className="p-6">
-          <h2 className="text-xl font-semibold mb-4" data-testid="heading-transactions">Transactions</h2>
+          <h2 className="text-xl font-semibold mb-4" data-testid="heading-transactions">Транзакции</h2>
           {isLoading ? (
             <div className="flex justify-center py-8">
               <Loader2 className="h-6 w-6 animate-spin" />
@@ -165,11 +165,11 @@ export default function Bookkeeping() {
                 <TableHeader>
                   <TableRow>
                     <TableHead>ID</TableHead>
-                    <TableHead>Date</TableHead>
-                    <TableHead>Amount</TableHead>
-                    <TableHead>Debit ID</TableHead>
-                    <TableHead>Credit ID</TableHead>
-                    <TableHead>Brand</TableHead>
+                    <TableHead>Дата</TableHead>
+                    <TableHead>Сумма</TableHead>
+                    <TableHead>ID дебета</TableHead>
+                    <TableHead>ID кредита</TableHead>
+                    <TableHead>Бренд</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -187,7 +187,7 @@ export default function Bookkeeping() {
               </Table>
               {(!transactions || transactions.length === 0) && (
                 <p className="text-center py-8 text-muted-foreground" data-testid="text-empty">
-                  No transactions yet. Add one to get started.
+                  Транзакций пока нет. Добавьте первую запись.
                 </p>
               )}
             </div>

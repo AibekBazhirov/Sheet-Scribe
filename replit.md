@@ -9,3 +9,8 @@ To enable Google Sheets integration, the following environment variables need to
 - `GOOGLE_PRIVATE_KEY`: Private key of the Service Account.
 
 The Google Sheet must be shared with the Service Account email.
+
+## User Preferences
+
+- **UI Language**: Russian (Русский) - All user-facing text should be in Russian
+- **App Title**: "Продажи" (Sales)
