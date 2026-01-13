@@ -29,10 +29,13 @@ const menuItems = [
   { name: "Склад", id: "warehouse" },
 ];
 
+const companies = ["Noutshop", "Onepoint"];
+
 export default function Bookkeeping() {
   const { toast } = useToast();
   const [selectedType, setSelectedType] = useState(transactionTypes[0]);
   const [activeMenu, setActiveMenu] = useState(menuItems[0].id);
+  const [selectedCompany, setSelectedCompany] = useState(companies[0]);
 
   const { data: transactions = [], isLoading } = useQuery<Transaction[]>({
     queryKey: [api.transactions.list.path],
@@ -88,7 +91,7 @@ export default function Bookkeeping() {
   return (
     <div className="min-h-screen bg-background">
       <header className="border-b bg-background sticky top-0 z-50">
-        <div className="max-w-4xl mx-auto px-6">
+        <div className="max-w-4xl mx-auto px-6 flex items-center justify-between">
           <nav className="flex gap-1">
             {menuItems.map((item) => (
               <button
@@ -105,6 +108,18 @@ export default function Bookkeeping() {
               </button>
             ))}
           </nav>
+          <Select value={selectedCompany} onValueChange={setSelectedCompany}>
+            <SelectTrigger className="w-auto" data-testid="select-company">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {companies.map((company) => (
+                <SelectItem key={company} value={company} data-testid={`select-company-${company}`}>
+                  {company}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
       </header>
 
