@@ -22,9 +22,17 @@ const transactionTypes = [
   "Погашение долга",
 ];
 
+const menuItems = [
+  { name: "Операции", id: "operations" },
+  { name: "Аналитика", id: "analytics" },
+  { name: "Долги", id: "debts" },
+  { name: "Склад", id: "warehouse" },
+];
+
 export default function Bookkeeping() {
   const { toast } = useToast();
   const [selectedType, setSelectedType] = useState(transactionTypes[0]);
+  const [activeMenu, setActiveMenu] = useState(menuItems[0].id);
 
   const { data: transactions = [], isLoading } = useQuery<Transaction[]>({
     queryKey: [api.transactions.list.path],
@@ -78,22 +86,44 @@ export default function Bookkeeping() {
   };
 
   return (
-    <div className="min-h-screen bg-background p-6">
-      <div className="max-w-4xl mx-auto">
-        <div className="mb-8">
-          <Select value={selectedType} onValueChange={setSelectedType}>
-            <SelectTrigger className="w-auto text-3xl font-bold border-none shadow-none p-0 h-auto" data-testid="select-type">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {transactionTypes.map((type) => (
-                <SelectItem key={type} value={type} data-testid={`select-item-${type}`}>
-                  {type}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+    <div className="min-h-screen bg-background">
+      <header className="border-b bg-background sticky top-0 z-50">
+        <div className="max-w-4xl mx-auto px-6">
+          <nav className="flex gap-1">
+            {menuItems.map((item) => (
+              <button
+                key={item.id}
+                onClick={() => setActiveMenu(item.id)}
+                className={`px-4 py-3 text-sm font-medium transition-colors hover-elevate ${
+                  activeMenu === item.id
+                    ? "border-b-2 border-primary text-foreground"
+                    : "text-muted-foreground"
+                }`}
+                data-testid={`menu-${item.id}`}
+              >
+                {item.name}
+              </button>
+            ))}
+          </nav>
         </div>
+      </header>
+
+      <div className="p-6">
+        <div className="max-w-4xl mx-auto">
+          <div className="mb-8">
+            <Select value={selectedType} onValueChange={setSelectedType}>
+              <SelectTrigger className="w-auto text-3xl font-bold border-none shadow-none p-0 h-auto" data-testid="select-type">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {transactionTypes.map((type) => (
+                  <SelectItem key={type} value={type} data-testid={`select-item-${type}`}>
+                    {type}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
 
         <Card className="p-6 mb-8">
           <h2 className="text-xl font-semibold mb-6" data-testid="heading-form">Добавить транзакцию</h2>
@@ -219,6 +249,7 @@ export default function Bookkeeping() {
             </div>
           )}
         </Card>
+        </div>
       </div>
     </div>
   );
