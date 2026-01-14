@@ -109,13 +109,13 @@ export default function Bookkeeping() {
         </div>
       </div>
       <header className="border-b bg-background sticky top-[52px] z-40">
-        <div className="max-w-4xl mx-auto px-6 flex items-center justify-between">
-          <nav className="flex gap-1">
+        <div className="max-w-4xl mx-auto px-4 md:px-6 flex items-center justify-between gap-2">
+          <nav className="flex overflow-x-auto scrollbar-hide">
             {menuItems.map((item) => (
               <button
                 key={item.id}
                 onClick={() => setActiveMenu(item.id)}
-                className={`px-4 py-3 text-sm font-medium transition-colors hover-elevate ${
+                className={`px-3 md:px-4 py-3 text-sm font-medium transition-colors hover-elevate whitespace-nowrap ${
                   activeMenu === item.id
                     ? "border-b-2 border-primary text-foreground"
                     : "text-muted-foreground"
@@ -127,7 +127,7 @@ export default function Bookkeeping() {
             ))}
           </nav>
           <Select value={selectedCompany} onValueChange={setSelectedCompany}>
-            <SelectTrigger className="w-auto" data-testid="select-company">
+            <SelectTrigger className="w-auto min-w-0 shrink-0" data-testid="select-company">
               <SelectValue placeholder="Компания" />
             </SelectTrigger>
             <SelectContent>
@@ -141,7 +141,7 @@ export default function Bookkeeping() {
         </div>
       </header>
 
-      <div className="p-6">
+      <div className="p-4 md:p-6">
         <div className="max-w-4xl mx-auto">
           <div className="mb-8">
             <Select value={selectedType} onValueChange={setSelectedType}>
