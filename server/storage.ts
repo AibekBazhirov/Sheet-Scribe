@@ -150,10 +150,14 @@ export class GoogleSheetsStorage implements IStorage {
         return [];
       }
       const rows = await sheet.getRows();
-      return rows.map((row, index) => ({
-        id: parseInt(row.get('id')) || index + 1,
-        name: row.get('name') || row.get('Name') || '',
-      })).filter(c => c.name);
+      return rows.map((row, index) => {
+        // Try various possible column names for company name
+        const name = row.get('ID_Company') || row.get('name') || row.get('Name') || row.get('company') || '';
+        return {
+          id: index + 1,
+          name: name.toString().trim(),
+        };
+      }).filter(c => c.name);
     } catch (error) {
       console.error("Error fetching companies from Google Sheets:", error);
       return [];
