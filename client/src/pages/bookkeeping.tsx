@@ -12,7 +12,7 @@ import { api } from "@shared/routes";
 import { insertTransactionSchema, type InsertTransaction, type Transaction, type Company } from "@shared/schema";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2 } from "lucide-react";
+import { Loader2, Laptop } from "lucide-react";
 
 const transactionTypes = [
   "Продажи",
@@ -98,7 +98,17 @@ export default function Bookkeeping() {
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="border-b bg-background sticky top-0 z-50">
+      <div className="bg-orange-500 text-white sticky top-0 z-50">
+        <div className="max-w-4xl mx-auto px-6 py-3 flex items-center gap-3">
+          <div className="bg-white/20 rounded-lg p-1.5">
+            <Laptop className="h-5 w-5" />
+          </div>
+          <span className="text-lg font-semibold tracking-wide" data-testid="text-app-title">
+            Учетная система Ноутшоп
+          </span>
+        </div>
+      </div>
+      <header className="border-b bg-background sticky top-[52px] z-40">
         <div className="max-w-4xl mx-auto px-6 flex items-center justify-between">
           <nav className="flex gap-1">
             {menuItems.map((item) => (
