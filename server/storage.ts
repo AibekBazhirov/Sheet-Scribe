@@ -1,10 +1,11 @@
-import { type Transaction, type InsertTransaction } from "@shared/schema";
+import { type Transaction, type InsertTransaction, type Company } from "@shared/schema";
 import { GoogleSpreadsheet } from "google-spreadsheet";
 import { JWT } from "google-auth-library";
 
 export interface IStorage {
   getTransactions(): Promise<Transaction[]>;
   createTransaction(transaction: InsertTransaction): Promise<Transaction>;
+  getCompanies(): Promise<Company[]>;
 }
 
 export class GoogleSheetsStorage implements IStorage {
@@ -125,6 +126,39 @@ export class GoogleSheetsStorage implements IStorage {
       throw error;
     }
   }
+
+  private async getSheetByTitle(title: string) {
+    const doc = await this.getDoc();
+    const sheet = doc.sheetsByTitle[title];
+    if (!sheet) {
+      console.warn(`Sheet "${title}" not found in spreadsheet`);
+      return null;
+    }
+    try {
+      await sheet.loadHeaderRow();
+    } catch (error) {
+      console.warn(`Could not load header row for sheet "${title}":`, error);
+      return null;
+    }
+    return sheet;
+  }
+
+  async getCompanies(): Promise<Company[]> {
+    try {
+      const sheet = await this.getSheetByTitle("Company");
+      if (!sheet) {
+        return [];
+      }
+      const rows = await sheet.getRows();
+      return rows.map((row, index) => ({
+        id: parseInt(row.get('id')) || index + 1,
+        name: row.get('name') || row.get('Name') || '',
+      })).filter(c => c.name);
+    } catch (error) {
+      console.error("Error fetching companies from Google Sheets:", error);
+      return [];
+    }
+  }
 }
 
 export class MemStorage implements IStorage {
@@ -149,6 +183,13 @@ export class MemStorage implements IStorage {
       };
       this.transactions.push(transaction);
       return transaction;
+    }
+
+    async getCompanies(): Promise<Company[]> {
+      return [
+        { id: 1, name: "Noutshop" },
+        { id: 2, name: "Onepoint" },
+      ];
     }
 }
 

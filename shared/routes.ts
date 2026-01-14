@@ -34,6 +34,15 @@ export const api = {
       },
     },
   },
+  companies: {
+    list: {
+      method: 'GET' as const,
+      path: '/api/companies',
+      responses: {
+        200: z.array(z.object({ id: z.number(), name: z.string() })),
+      },
+    },
+  },
 };
 
 export function buildUrl(path: string, params?: Record<string, string | number>): string {

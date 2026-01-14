@@ -9,7 +9,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Form, FormControl, FormField, FormItem, FormLabel } from "@/components/ui/form";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { api } from "@shared/routes";
-import { insertTransactionSchema, type InsertTransaction, type Transaction } from "@shared/schema";
+import { insertTransactionSchema, type InsertTransaction, type Transaction, type Company } from "@shared/schema";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2 } from "lucide-react";
@@ -29,13 +29,21 @@ const menuItems = [
   { name: "Склад", id: "warehouse" },
 ];
 
-const companies = ["Noutshop", "Onepoint"];
-
 export default function Bookkeeping() {
   const { toast } = useToast();
   const [selectedType, setSelectedType] = useState(transactionTypes[0]);
   const [activeMenu, setActiveMenu] = useState(menuItems[0].id);
-  const [selectedCompany, setSelectedCompany] = useState(companies[0]);
+  const [selectedCompany, setSelectedCompany] = useState<string>("");
+
+  const { data: companies = [] } = useQuery<Company[]>({
+    queryKey: [api.companies.list.path],
+    queryFn: async () => {
+      const res = await fetch(api.companies.list.path);
+      if (!res.ok) return [];
+      const data = await res.json();
+      return Array.isArray(data) ? data : [];
+    },
+  });
 
   const { data: transactions = [], isLoading } = useQuery<Transaction[]>({
     queryKey: [api.transactions.list.path],
@@ -110,12 +118,12 @@ export default function Bookkeeping() {
           </nav>
           <Select value={selectedCompany} onValueChange={setSelectedCompany}>
             <SelectTrigger className="w-auto" data-testid="select-company">
-              <SelectValue />
+              <SelectValue placeholder="Компания" />
             </SelectTrigger>
             <SelectContent>
               {companies.map((company) => (
-                <SelectItem key={company} value={company} data-testid={`select-company-${company}`}>
-                  {company}
+                <SelectItem key={company.id} value={company.name} data-testid={`select-company-${company.id}`}>
+                  {company.name}
                 </SelectItem>
               ))}
             </SelectContent>

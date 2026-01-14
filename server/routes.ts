@@ -34,5 +34,14 @@ export async function registerRoutes(
     }
   });
 
+  app.get(api.companies.list.path, async (req, res) => {
+    try {
+      const companies = await storage.getCompanies();
+      res.json(companies);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch companies" });
+    }
+  });
+
   return httpServer;
 }
