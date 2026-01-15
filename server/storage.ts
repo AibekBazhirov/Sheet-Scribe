@@ -1,11 +1,17 @@
-import { type Transaction, type InsertTransaction, type Company } from "@shared/schema";
+import { type Transaction, type InsertTransaction, type Company, type User, users } from "@shared/schema";
 import { GoogleSpreadsheet } from "google-spreadsheet";
 import { JWT } from "google-auth-library";
+import { db } from "./db";
+import { eq } from "drizzle-orm";
+import bcrypt from "bcryptjs";
 
 export interface IStorage {
   getTransactions(): Promise<Transaction[]>;
-  createTransaction(transaction: InsertTransaction): Promise<Transaction>;
+  createTransaction(transaction: InsertTransaction, userId?: number, userName?: string): Promise<Transaction>;
   getCompanies(): Promise<Company[]>;
+  getUserByUsername(username: string): Promise<User | null>;
+  createUser(username: string, password: string, displayName: string, role?: string): Promise<User>;
+  verifyPassword(password: string, hash: string): Promise<boolean>;
 }
 
 export class GoogleSheetsStorage implements IStorage {
@@ -56,7 +62,7 @@ export class GoogleSheetsStorage implements IStorage {
   private async getSheet() {
     const doc = await this.getDoc();
     const sheet = doc.sheetsByIndex[0];
-    const headers = ['id', 'date', 'amount', 'debit_id', 'credit_id', 'brand', 'created_at', 'updated_at'];
+    const headers = ['id', 'date', 'amount', 'debit_id', 'credit_id', 'brand', 'created_by_user_id', 'created_by_name', 'created_at', 'updated_at'];
     
     try {
       await sheet.loadHeaderRow();
@@ -64,7 +70,6 @@ export class GoogleSheetsStorage implements IStorage {
         await sheet.setHeaderRow(headers);
       }
     } catch (error) {
-      // If loading header fails (empty sheet), set the headers
       await sheet.setHeaderRow(headers);
       await sheet.loadHeaderRow();
     }
@@ -82,17 +87,18 @@ export class GoogleSheetsStorage implements IStorage {
         debit_id: row.get('debit_id') || null,
         credit_id: row.get('credit_id') || null,
         brand: row.get('brand') || null,
+        created_by_user_id: row.get('created_by_user_id') ? parseInt(row.get('created_by_user_id')) : null,
+        created_by_name: row.get('created_by_name') || null,
         created_at: row.get('created_at') ? new Date(row.get('created_at')) : new Date(),
         updated_at: row.get('updated_at') ? new Date(row.get('updated_at')) : new Date(),
       })) as Transaction[];
     } catch (error) {
       console.error("Error fetching transactions from Google Sheets:", error);
-      // Return empty array for credential/auth errors so the app still works
       return [];
     }
   }
 
-  async createTransaction(transaction: InsertTransaction): Promise<Transaction> {
+  async createTransaction(transaction: InsertTransaction, userId?: number, userName?: string): Promise<Transaction> {
     try {
       const sheet = await this.getSheet();
       const rows = await sheet.getRows();
@@ -105,6 +111,8 @@ export class GoogleSheetsStorage implements IStorage {
         debit_id: transaction.debit_id || '',
         credit_id: transaction.credit_id || '',
         brand: transaction.brand || '',
+        created_by_user_id: userId?.toString() || '',
+        created_by_name: userName || '',
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
       };
@@ -118,6 +126,8 @@ export class GoogleSheetsStorage implements IStorage {
         debit_id: transaction.debit_id || null,
         credit_id: transaction.credit_id || null,
         brand: transaction.brand || null,
+        created_by_user_id: userId || null,
+        created_by_name: userName || null,
         created_at: new Date(),
         updated_at: new Date(),
       };
@@ -151,7 +161,6 @@ export class GoogleSheetsStorage implements IStorage {
       }
       const rows = await sheet.getRows();
       return rows.map((row, index) => {
-        // Try various possible column names for company name
         const name = row.get('ID_Company') || row.get('name') || row.get('Name') || row.get('company') || '';
         return {
           id: index + 1,
@@ -163,17 +172,39 @@ export class GoogleSheetsStorage implements IStorage {
       return [];
     }
   }
+
+  async getUserByUsername(username: string): Promise<User | null> {
+    const result = await db.select().from(users).where(eq(users.username, username));
+    return result[0] || null;
+  }
+
+  async createUser(username: string, password: string, displayName: string, role: string = "manager"): Promise<User> {
+    const password_hash = await bcrypt.hash(password, 10);
+    const result = await db.insert(users).values({
+      username,
+      password_hash,
+      display_name: displayName,
+      role,
+    }).returning();
+    return result[0];
+  }
+
+  async verifyPassword(password: string, hash: string): Promise<boolean> {
+    return bcrypt.compare(password, hash);
+  }
 }
 
 export class MemStorage implements IStorage {
     private transactions: Transaction[] = [];
+    private memUsers: User[] = [];
     private idCounter = 1;
+    private userIdCounter = 1;
   
     async getTransactions(): Promise<Transaction[]> {
       return this.transactions;
     }
   
-    async createTransaction(insertTransaction: InsertTransaction): Promise<Transaction> {
+    async createTransaction(insertTransaction: InsertTransaction, userId?: number, userName?: string): Promise<Transaction> {
       const now = new Date();
       const transaction: Transaction = {
         id: this.idCounter++,
@@ -182,6 +213,8 @@ export class MemStorage implements IStorage {
         debit_id: insertTransaction.debit_id || null,
         credit_id: insertTransaction.credit_id || null,
         brand: insertTransaction.brand || null,
+        created_by_user_id: userId || null,
+        created_by_name: userName || null,
         created_at: now,
         updated_at: now,
       };
@@ -194,6 +227,28 @@ export class MemStorage implements IStorage {
         { id: 1, name: "Noutshop" },
         { id: 2, name: "Onepoint" },
       ];
+    }
+
+    async getUserByUsername(username: string): Promise<User | null> {
+      return this.memUsers.find(u => u.username === username) || null;
+    }
+
+    async createUser(username: string, password: string, displayName: string, role: string = "manager"): Promise<User> {
+      const password_hash = await bcrypt.hash(password, 10);
+      const user: User = {
+        id: this.userIdCounter++,
+        username,
+        password_hash,
+        display_name: displayName,
+        role,
+        created_at: new Date(),
+      };
+      this.memUsers.push(user);
+      return user;
+    }
+
+    async verifyPassword(password: string, hash: string): Promise<boolean> {
+      return bcrypt.compare(password, hash);
     }
 }
 

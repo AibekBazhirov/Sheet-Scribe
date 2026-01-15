@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { insertTransactionSchema, transactions } from './schema';
+import { insertTransactionSchema, loginSchema, type Transaction } from './schema';
 
 export const errorSchemas = {
   validation: z.object({
@@ -20,7 +20,7 @@ export const api = {
       method: 'GET' as const,
       path: '/api/transactions',
       responses: {
-        200: z.array(z.custom<typeof transactions.$inferSelect>()),
+        200: z.array(z.custom<Transaction>()),
       },
     },
     create: {
@@ -28,7 +28,7 @@ export const api = {
       path: '/api/transactions',
       input: insertTransactionSchema,
       responses: {
-        201: z.custom<typeof transactions.$inferSelect>(),
+        201: z.custom<Transaction>(),
         400: errorSchemas.validation,
         500: errorSchemas.internal,
       },
@@ -41,6 +41,21 @@ export const api = {
       responses: {
         200: z.array(z.object({ id: z.number(), name: z.string() })),
       },
+    },
+  },
+  auth: {
+    login: {
+      method: 'POST' as const,
+      path: '/api/auth/login',
+      input: loginSchema,
+    },
+    logout: {
+      method: 'POST' as const,
+      path: '/api/auth/logout',
+    },
+    me: {
+      method: 'GET' as const,
+      path: '/api/auth/me',
     },
   },
 };

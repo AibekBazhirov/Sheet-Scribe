@@ -2,27 +2,54 @@ import { pgTable, text, serial, timestamp } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
-export const transactions = pgTable("transactions", {
+export const users = pgTable("users", {
   id: serial("id").primaryKey(),
-  date: text("date").notNull(),
-  amount: text("amount").notNull(),
-  debit_id: text("debit_id"),
-  credit_id: text("credit_id"),
-  brand: text("brand"),
+  username: text("username").notNull().unique(),
+  password_hash: text("password_hash").notNull(),
+  display_name: text("display_name").notNull(),
+  role: text("role").notNull().default("manager"),
   created_at: timestamp("created_at").defaultNow(),
-  updated_at: timestamp("updated_at").defaultNow(),
 });
 
-export const insertTransactionSchema = createInsertSchema(transactions).omit({
+export const insertUserSchema = createInsertSchema(users).omit({
   id: true,
   created_at: true,
-  updated_at: true,
+});
+
+export type InsertUser = z.infer<typeof insertUserSchema>;
+export type User = typeof users.$inferSelect;
+
+export const insertTransactionSchema = z.object({
+  date: z.string().min(1),
+  amount: z.string().min(1),
+  debit_id: z.string().optional(),
+  credit_id: z.string().optional(),
+  brand: z.string().optional(),
 });
 
 export type InsertTransaction = z.infer<typeof insertTransactionSchema>;
-export type Transaction = typeof transactions.$inferSelect;
+
+export type Transaction = {
+  id: number;
+  date: string;
+  amount: string;
+  debit_id: string | null;
+  credit_id: string | null;
+  brand: string | null;
+  created_by_user_id: number | null;
+  created_by_name: string | null;
+  created_at: Date;
+  updated_at: Date;
+};
 
 export type Company = {
   id: number;
   name: string;
 };
+
+export const loginSchema = z.object({
+  username: z.string().min(1, "Введите логин"),
+  password: z.string().min(1, "Введите пароль"),
+});
+
+export type LoginInput = z.infer<typeof loginSchema>;

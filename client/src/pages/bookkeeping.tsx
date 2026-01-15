@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
+import { useLocation } from "wouter";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,7 +13,7 @@ import { api } from "@shared/routes";
 import { insertTransactionSchema, type InsertTransaction, type Transaction, type Company } from "@shared/schema";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Laptop } from "lucide-react";
+import { Loader2, Laptop, LogOut, User } from "lucide-react";
 
 const transactionTypes = [
   "Продажи",
@@ -31,9 +32,30 @@ const menuItems = [
 
 export default function Bookkeeping() {
   const { toast } = useToast();
+  const [, setLocation] = useLocation();
   const [selectedType, setSelectedType] = useState(transactionTypes[0]);
   const [activeMenu, setActiveMenu] = useState(menuItems[0].id);
   const [selectedCompany, setSelectedCompany] = useState<string>("");
+
+  const { data: user } = useQuery<{ id: number; display_name: string } | null>({
+    queryKey: [api.auth.me.path],
+    queryFn: async () => {
+      const res = await fetch(api.auth.me.path, { credentials: 'include' });
+      if (!res.ok) return null;
+      return res.json();
+    },
+  });
+
+  const logoutMutation = useMutation({
+    mutationFn: async () => {
+      const res = await apiRequest("POST", api.auth.logout.path, {});
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [api.auth.me.path] });
+      setLocation("/login");
+    },
+  });
 
   const { data: companies = [] } = useQuery<Company[]>({
     queryKey: [api.companies.list.path],
@@ -99,13 +121,32 @@ export default function Bookkeeping() {
   return (
     <div className="min-h-screen bg-background">
       <div className="bg-orange-500 text-white sticky top-0 z-50">
-        <div className="max-w-4xl mx-auto px-6 py-3 flex items-center gap-3">
-          <div className="bg-white/20 rounded-lg p-1.5">
-            <Laptop className="h-5 w-5" />
+        <div className="max-w-4xl mx-auto px-4 md:px-6 py-3 flex items-center justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <div className="bg-white/20 rounded-lg p-1.5">
+              <Laptop className="h-5 w-5" />
+            </div>
+            <span className="text-lg font-semibold tracking-wide" data-testid="text-app-title">
+              Учетная система Ноутшоп
+            </span>
           </div>
-          <span className="text-lg font-semibold tracking-wide" data-testid="text-app-title">
-            Учетная система Ноутшоп
-          </span>
+          {user && (
+            <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1.5 text-sm">
+                <User className="h-4 w-4" />
+                <span data-testid="text-user-name">{user.display_name}</span>
+              </div>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => logoutMutation.mutate()}
+                className="text-white hover:bg-white/20"
+                data-testid="button-logout"
+              >
+                <LogOut className="h-4 w-4" />
+              </Button>
+            </div>
+          )}
         </div>
       </div>
       <header className="border-b bg-background sticky top-[52px] z-40">
