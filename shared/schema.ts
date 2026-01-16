@@ -53,3 +53,23 @@ export const loginSchema = z.object({
 });
 
 export type LoginInput = z.infer<typeof loginSchema>;
+
+export const createUserSchema = z.object({
+  username: z.string().min(1, "Введите логин"),
+  password: z.string().min(4, "Пароль должен быть минимум 4 символа"),
+  display_name: z.string().min(1, "Введите имя"),
+  role: z.enum(["admin", "manager"]).default("manager"),
+});
+
+export type CreateUserInput = z.infer<typeof createUserSchema>;
+
+export const updateUserSchema = z.object({
+  username: z.string().min(1).optional(),
+  password: z.string().min(4).optional(),
+  display_name: z.string().min(1).optional(),
+  role: z.enum(["admin", "manager"]).optional(),
+});
+
+export type UpdateUserInput = z.infer<typeof updateUserSchema>;
+
+export type UserPublic = Omit<User, 'password_hash'>;
