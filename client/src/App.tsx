@@ -6,6 +6,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import NotFound from "@/pages/not-found";
 import Bookkeeping from "@/pages/bookkeeping";
 import Login from "@/pages/login";
+import Admin from "@/pages/admin";
 import { api } from "@shared/routes";
 import { Loader2 } from "lucide-react";
 
@@ -47,6 +48,9 @@ function Router() {
   return (
     <Switch>
       <Route path="/login" component={Login} />
+      <Route path="/admin">
+        <ProtectedRoute component={Admin} />
+      </Route>
       <Route path="/">
         <ProtectedRoute component={Bookkeeping} />
       </Route>

@@ -13,7 +13,7 @@ import { api } from "@shared/routes";
 import { insertTransactionSchema, type InsertTransaction, type Transaction, type Company } from "@shared/schema";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Laptop, LogOut, User } from "lucide-react";
+import { Loader2, Laptop, LogOut, User, Settings } from "lucide-react";
 
 const transactionTypes = [
   "Продажи",
@@ -37,7 +37,7 @@ export default function Bookkeeping() {
   const [activeMenu, setActiveMenu] = useState(menuItems[0].id);
   const [selectedCompany, setSelectedCompany] = useState<string>("");
 
-  const { data: user } = useQuery<{ id: number; display_name: string } | null>({
+  const { data: user } = useQuery<{ id: number; display_name: string; role: string } | null>({
     queryKey: [api.auth.me.path],
     queryFn: async () => {
       const res = await fetch(api.auth.me.path, { credentials: 'include' });
@@ -136,6 +136,17 @@ export default function Bookkeeping() {
                 <User className="h-4 w-4" />
                 <span data-testid="text-user-name">{user.display_name}</span>
               </div>
+              {user.role === "admin" && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setLocation("/admin")}
+                  className="text-white hover:bg-white/20"
+                  data-testid="button-admin"
+                >
+                  <Settings className="h-4 w-4" />
+                </Button>
+              )}
               <Button
                 variant="ghost"
                 size="icon"
