@@ -84,7 +84,21 @@ app.use((req, res, next) => {
   next();
 });
 
+async function seedAdminUser() {
+  const { storage } = await import("./storage");
+  try {
+    const existingAdmin = await storage.getUserByUsername("admin");
+    if (!existingAdmin) {
+      await storage.createUser("admin", "admin123", "Администратор", "admin");
+      console.log("Admin user created successfully");
+    }
+  } catch (error) {
+    console.error("Error seeding admin user:", error);
+  }
+}
+
 (async () => {
+  await seedAdminUser();
   await registerRoutes(httpServer, app);
 
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
