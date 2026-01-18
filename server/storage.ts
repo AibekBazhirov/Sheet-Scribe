@@ -66,8 +66,11 @@ export class GoogleSheetsStorage implements IStorage {
 
   private async getSheet() {
     const doc = await this.getDoc();
-    const sheet = doc.sheetsByIndex[0];
-    const headers = ['id', 'date', 'amount', 'debit_id', 'credit_id', 'brand', 'created_by_user_id', 'created_by_name', 'created_at', 'updated_at'];
+    const sheet = doc.sheetsByTitle['Транзакции'];
+    if (!sheet) {
+      throw new Error("Sheet 'Транзакции' not found in Google Sheets");
+    }
+    const headers = ['id', 'date', 'amount', 'debit_id', 'credit_id', 'brand', 'bank_account', 'created_by_user_id', 'created_by_name', 'created_at', 'updated_at'];
     
     try {
       await sheet.loadHeaderRow();
