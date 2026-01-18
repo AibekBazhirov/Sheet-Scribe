@@ -112,11 +112,16 @@ export default function Bookkeeping() {
     },
   });
 
-  const onSubmit = (data: InsertTransaction) => {
-    createMutation.mutate({
+  const onSubmit = async (data: InsertTransaction) => {
+    await createMutation.mutateAsync({
       ...data,
       debit_id: "1210",
       credit_id: "6010",
+    });
+    createMutation.mutate({
+      ...data,
+      debit_id: "7010",
+      credit_id: "1310",
     });
   };
 
