@@ -129,6 +129,15 @@ export async function registerRoutes(
     }
   });
 
+  app.get(api.bankAccounts.list.path, async (req, res) => {
+    try {
+      const bankAccounts = await storage.getBankAccounts();
+      res.json(bankAccounts);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch bank accounts" });
+    }
+  });
+
   app.get("/api/admin/users", requireAdmin, async (req, res) => {
     try {
       const users = await storage.listUsers();

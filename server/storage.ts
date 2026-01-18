@@ -1,4 +1,4 @@
-import { type Transaction, type InsertTransaction, type Company, type User, type UserPublic, users } from "@shared/schema";
+import { type Transaction, type InsertTransaction, type Company, type BankAccount, type User, type UserPublic, users } from "@shared/schema";
 import { GoogleSpreadsheet } from "google-spreadsheet";
 import { JWT } from "google-auth-library";
 import { db } from "./db";
@@ -9,6 +9,7 @@ export interface IStorage {
   getTransactions(): Promise<Transaction[]>;
   createTransaction(transaction: InsertTransaction, userId?: number, userName?: string): Promise<Transaction>;
   getCompanies(): Promise<Company[]>;
+  getBankAccounts(): Promise<BankAccount[]>;
   getUserByUsername(username: string): Promise<User | null>;
   getUserById(id: number): Promise<User | null>;
   createUser(username: string, password: string, displayName: string, role?: string): Promise<User>;
@@ -180,6 +181,28 @@ export class GoogleSheetsStorage implements IStorage {
     }
   }
 
+  async getBankAccounts(): Promise<BankAccount[]> {
+    try {
+      const sheet = await this.getSheetByTitle("Счета");
+      if (!sheet) {
+        return [];
+      }
+      const rows = await sheet.getRows();
+      return rows.map((row, index) => {
+        const headerRow = sheet.headerValues;
+        const columnBHeader = headerRow[1];
+        const name = columnBHeader ? row.get(columnBHeader) : '';
+        return {
+          id: index + 1,
+          name: name ? name.toString().trim() : '',
+        };
+      }).filter(b => b.name);
+    } catch (error) {
+      console.error("Error fetching bank accounts from Google Sheets:", error);
+      return [];
+    }
+  }
+
   async getUserByUsername(username: string): Promise<User | null> {
     const result = await db.select().from(users).where(eq(users.username, username));
     return result[0] || null;
@@ -270,6 +293,13 @@ export class MemStorage implements IStorage {
       return [
         { id: 1, name: "Noutshop" },
         { id: 2, name: "Onepoint" },
+      ];
+    }
+
+    async getBankAccounts(): Promise<BankAccount[]> {
+      return [
+        { id: 1, name: "Халык" },
+        { id: 2, name: "Каспи" },
       ];
     }
 

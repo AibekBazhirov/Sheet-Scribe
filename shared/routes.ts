@@ -43,6 +43,15 @@ export const api = {
       },
     },
   },
+  bankAccounts: {
+    list: {
+      method: 'GET' as const,
+      path: '/api/bank-accounts',
+      responses: {
+        200: z.array(z.object({ id: z.number(), name: z.string() })),
+      },
+    },
+  },
   auth: {
     login: {
       method: 'POST' as const,

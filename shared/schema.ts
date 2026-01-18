@@ -49,6 +49,11 @@ export type Company = {
   name: string;
 };
 
+export type BankAccount = {
+  id: number;
+  name: string;
+};
+
 export const loginSchema = z.object({
   username: z.string().min(1, "Введите логин"),
   password: z.string().min(1, "Введите пароль"),

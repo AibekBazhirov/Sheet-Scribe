@@ -10,7 +10,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Form, FormControl, FormField, FormItem, FormLabel } from "@/components/ui/form";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { api } from "@shared/routes";
-import { insertTransactionSchema, type InsertTransaction, type Transaction, type Company } from "@shared/schema";
+import { insertTransactionSchema, type InsertTransaction, type Transaction, type Company, type BankAccount } from "@shared/schema";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, Laptop, LogOut, User, Settings } from "lucide-react";
@@ -22,8 +22,6 @@ const transactionTypes = [
   "Кассовые операции",
   "Погашение долга",
 ];
-
-const bankAccounts = ["Халык", "Каспи"];
 
 const menuItems = [
   { name: "Операции", id: "operations" },
@@ -63,6 +61,16 @@ export default function Bookkeeping() {
     queryKey: [api.companies.list.path],
     queryFn: async () => {
       const res = await fetch(api.companies.list.path);
+      if (!res.ok) return [];
+      const data = await res.json();
+      return Array.isArray(data) ? data : [];
+    },
+  });
+
+  const { data: bankAccounts = [] } = useQuery<BankAccount[]>({
+    queryKey: [api.bankAccounts.list.path],
+    queryFn: async () => {
+      const res = await fetch(api.bankAccounts.list.path);
       if (!res.ok) return [];
       const data = await res.json();
       return Array.isArray(data) ? data : [];
@@ -278,8 +286,8 @@ export default function Bookkeeping() {
                         </FormControl>
                         <SelectContent>
                           {bankAccounts.map((bank) => (
-                            <SelectItem key={bank} value={bank} data-testid={`select-bank-${bank}`}>
-                              {bank}
+                            <SelectItem key={bank.id} value={bank.name} data-testid={`select-bank-${bank.id}`}>
+                              {bank.name}
                             </SelectItem>
                           ))}
                         </SelectContent>
