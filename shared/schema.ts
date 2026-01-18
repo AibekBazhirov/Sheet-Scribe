@@ -25,6 +25,7 @@ export const insertTransactionSchema = z.object({
   debit_id: z.string().optional(),
   credit_id: z.string().optional(),
   brand: z.string().optional(),
+  bank_account: z.string().optional(),
 });
 
 export type InsertTransaction = z.infer<typeof insertTransactionSchema>;
@@ -36,6 +37,7 @@ export type Transaction = {
   debit_id: string | null;
   credit_id: string | null;
   brand: string | null;
+  bank_account: string | null;
   created_by_user_id: number | null;
   created_by_name: string | null;
   created_at: Date;

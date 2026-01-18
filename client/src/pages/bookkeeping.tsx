@@ -23,6 +23,8 @@ const transactionTypes = [
   "Погашение долга",
 ];
 
+const bankAccounts = ["Халык", "Каспи"];
+
 const menuItems = [
   { name: "Операции", id: "operations" },
   { name: "Аналитика", id: "analytics" },
@@ -87,6 +89,7 @@ export default function Bookkeeping() {
       date: today,
       amount: "",
       brand: "",
+      bank_account: "",
     },
   });
 
@@ -248,18 +251,43 @@ export default function Bookkeeping() {
                 />
               </div>
 
-              <FormField
-                control={form.control}
-                name="brand"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Бренд</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Название бренда" {...field} value={field.value || ""} data-testid="input-brand" />
-                    </FormControl>
-                  </FormItem>
-                )}
-              />
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="brand"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Бренд</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Название бренда" {...field} value={field.value || ""} data-testid="input-brand" />
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="bank_account"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Банковский счёт</FormLabel>
+                      <Select onValueChange={field.onChange} value={field.value || ""}>
+                        <FormControl>
+                          <SelectTrigger data-testid="select-bank">
+                            <SelectValue placeholder="Выберите банк" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {bankAccounts.map((bank) => (
+                            <SelectItem key={bank} value={bank} data-testid={`select-bank-${bank}`}>
+                              {bank}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </FormItem>
+                  )}
+                />
+              </div>
 
               <Button 
                 type="submit" 
@@ -291,6 +319,7 @@ export default function Bookkeeping() {
                     <TableHead>ID дебета</TableHead>
                     <TableHead>ID кредита</TableHead>
                     <TableHead>Бренд</TableHead>
+                    <TableHead>Банк</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -302,6 +331,7 @@ export default function Bookkeeping() {
                       <TableCell data-testid={`text-debit-${tx.id}`}>{tx.debit_id || "-"}</TableCell>
                       <TableCell data-testid={`text-credit-${tx.id}`}>{tx.credit_id || "-"}</TableCell>
                       <TableCell data-testid={`text-brand-${tx.id}`}>{tx.brand || "-"}</TableCell>
+                      <TableCell data-testid={`text-bank-${tx.id}`}>{tx.bank_account || "-"}</TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
