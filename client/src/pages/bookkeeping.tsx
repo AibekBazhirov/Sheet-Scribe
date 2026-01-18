@@ -86,8 +86,6 @@ export default function Bookkeeping() {
     defaultValues: {
       date: today,
       amount: "",
-      debit_id: "",
-      credit_id: "",
       brand: "",
     },
   });
@@ -115,7 +113,11 @@ export default function Bookkeeping() {
   });
 
   const onSubmit = (data: InsertTransaction) => {
-    createMutation.mutate(data);
+    createMutation.mutate({
+      ...data,
+      debit_id: "1210",
+      credit_id: "6010",
+    });
   };
 
   return (
@@ -235,33 +237,6 @@ export default function Bookkeeping() {
                       <FormLabel>Сумма *</FormLabel>
                       <FormControl>
                         <Input type="number" step="0.01" placeholder="0.00" {...field} data-testid="input-amount" />
-                      </FormControl>
-                    </FormItem>
-                  )}
-                />
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <FormField
-                  control={form.control}
-                  name="debit_id"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>ID дебета</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Дебетовый счёт" {...field} value={field.value || ""} data-testid="input-debit" />
-                      </FormControl>
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="credit_id"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>ID кредита</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Кредитовый счёт" {...field} value={field.value || ""} data-testid="input-credit" />
                       </FormControl>
                     </FormItem>
                   )}
